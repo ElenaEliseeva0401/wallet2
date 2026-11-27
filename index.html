@@ -573,6 +573,10 @@
 <body>
   <div id="app"></div>
 
+  <!-- Firebase: подключение для веб-страницы -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
   <!-- ВЕСЬ JS КОД ВСТАВЛЕН ПРЯМО СЮДА -->
   <script>
 // ================== ДАННЫЕ ==================
@@ -1256,6 +1260,60 @@ function renderAdminSettings(container) {
   } }, "🔥 СБРОСИТЬ ВСЁ"));
   container.appendChild(c2);
 }
+
+// ================== СИНХРОНИЗАЦИЯ (Firebase) ==================
+const firebaseConfig = {
+  apiKey: "AIzaSyBuPHtoRpbY-v6ycq2Lp1K-l1K3Id2IFPM",
+  authDomain: "walletgame-784e0.firebaseapp.com",
+  databaseURL: "https://walletgame-784e0-default-rtdb.firebaseio.com",
+  projectId: "walletgame-784e0",
+  storageBucket: "walletgame-784e0.firebasestorage.app",
+  messagingSenderId: "391251924003",
+  appId: "1:391251924003:web:572a56bd8c96318e83cd96",
+  measurementId: "G-6MYSC5JQ1L"
+};
+
+let cloudDb = null;
+let cloudReady = false;
+let lastPushed = "";
+
+// Оборачиваем saveData: при каждом сохранении данные уходят и в облако
+const _saveLocal = saveData;
+saveData = function () {
+  _saveLocal();
+  if (cloudReady && cloudDb) {
+    try {
+      lastPushed = JSON.stringify(data);
+      cloudDb.set(JSON.parse(lastPushed));
+    } catch (e) { console.error("Не удалось отправить в облако:", e); }
+  }
+};
+
+function initCloud() {
+  try {
+    firebase.initializeApp(firebaseConfig);
+    cloudDb = firebase.database().ref("game_state");
+    cloudDb.on("value", (snap) => {
+      const val = snap.val();
+      if (!val) {
+        // База пустая — выкладываем туда то, что есть на этом телефоне
+        if (cloudReady && !lastPushed) { lastPushed = JSON.stringify(data); cloudDb.set(data); }
+        cloudReady = true;
+        return;
+      }
+      const incoming = JSON.stringify(val);
+      if (incoming === lastPushed) { cloudReady = true; return; } // это наше же обновление
+      lastPushed = incoming;
+      data = val;
+      const base = defaultData();
+      for (const k in base) if (!(k in data)) data[k] = base[k];
+      try { localStorage.setItem(STORAGE_KEY, incoming); } catch (e) {}
+      cloudReady = true;
+      if (currentUser) renderApp(); else renderLogin();
+    }, (error) => console.error("Ошибка базы данных:", error));
+  } catch (e) { console.error("Firebase не запустился:", e); }
+}
+initCloud();
 
 document.addEventListener("DOMContentLoaded", () => { checkNewDay(); renderLogin(); });
   </script>
