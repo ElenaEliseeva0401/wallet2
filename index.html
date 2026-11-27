@@ -572,6 +572,25 @@
 </head>
 <body>
   <div id="app"></div>
+  
+  <script>
+(function () {
+  function showErr(msg) {
+    var bar = document.getElementById("errBar");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.id = "errBar";
+      bar.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:99999;background:#EF4444;color:#fff;font-size:12px;padding:10px;word-break:break-all;";
+      document.body.appendChild(bar);
+    }
+    bar.textContent = "Ошибка: " + msg;
+  }
+  window.addEventListener("error", function (e) { showErr(e.message); });
+  window.addEventListener("unhandledrejection", function (e) {
+    showErr(String((e.reason && e.reason.message) || e.reason));
+  });
+})();
+</script>
 
   <!-- Firebase: подключение для веб-страницы -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
