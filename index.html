@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#42A5F5">
+  <title>Мой Кошелек</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Comic Sans MS', system-ui, sans-serif;
+      background: linear-gradient(160deg, #0F172A 0%, #1E293B 50%, #0E7490 100%);
+      min-height: 100vh;
+      color: #E2E8F0;
+      overflow-x: hidden;
+    }
+
+    #app {
+      max-width: 520px;
+      margin: 0 auto;
+      min-height: 100vh;
+      padding: 0 0 80px 0;
+      position: relative;
+    }
+
+    .screen {
+      animation: fadeIn 0.3s ease;
+      padding: 16px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h1, h2, h3 { font-weight: 800; }
+
+    .title {
+      text-align: center;
+      font-size: 28px;
+      margin: 24px 0 8px;
+      background: linear-gradient(90deg, #38BDF8, #22D3EE, #FBBF24);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 900;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #94A3B8;
+      margin-bottom: 24px;
+      font-size: 15px;
+    }
+
+    .card {
+      background: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(56, 189, 248, 0.15);
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      backdrop-filter: blur(8px);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 14px;
+      padding: 14px 20px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, filter 0.12s;
+      font-family: inherit;
+      color: #0F172A;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #38BDF8, #22D3EE);
+      box-shadow: 0 4px 14px rgba(56, 189, 248, 0.4);
+    }
+
+    .btn-success {
+      background: linear-gradient(135deg, #4ADE80, #22C55E);
+      box-shadow: 0 4px 14px rgba(74, 222, 128, 0.4);
+    }
+
+    .btn-warn {
+      background: linear-gradient(135deg, #FBBF24, #F59E0B);
+      box-shadow: 0 4px 14px rgba(251, 191, 36, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #F87171, #EF4444);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(248, 113, 113, 0.4);
+    }
+
+    .btn-ghost {
+      background: rgba(56, 189, 248, 0.12);
+      color: #38BDF8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .btn-sm {
+      padding: 8px 14px;
+      font-size: 13px;
+      width: auto;
+      display: inline-block;
+      margin: 0;
+    }
+
+    .login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .login-emoji {
+      font-size: 64px;
+      margin-bottom: 12px;
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-12px); }
+    }
+
+    .login-buttons {
+      width: 100%;
+      max-width: 320px;
+      margin-top: 30px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1E40AF, #0E7490);
+      padding: 18px 16px;
+      border-radius: 0 0 24px 24px;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .hello {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .coins-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .coin-plate {
+      flex: 1;
+      background: rgba(255,255,255,0.12);
+      border-radius: 12px;
+      padding: 8px 6px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+
+    .coin-plate .icon { font-size: 18px; }
+    .coin-plate .label { font-size: 10px; color: rgba(255,255,255,0.75); margin-top: 2px; }
+    .coin-plate .value { font-size: 16px; font-weight: 800; color: #FBBF24; margin-top: 2px; }
+    .coin-plate.pending .value { color: #FBBF24; }
+    .coin-plate.personal .value { color: #4ADE80; }
+    .coin-plate.bank .value { color: #38BDF8; }
+
+    .level-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .progress-bg {
+      height: 14px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #FBBF24, #F59E0B);
+      border-radius: 8px;
+      transition: width 0.4s;
+    }
+
+    .progress-text {
+      font-size: 11px;
+      color: rgba(255,255,255,0.7);
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    .tabs {
+      display: flex;
+      background: #0F172A;
+      position: sticky;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      border-top: 1px solid rgba(56, 189, 248, 0.2);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .tab-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #64748B;
+      padding: 10px 4px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-family: inherit;
+    }
+
+    .tab-btn .tab-icon { font-size: 20px; }
+    .tab-btn.active { color: #38BDF8; }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(30, 41, 59, 0.85);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-left: 4px solid #FBBF24;
+    }
+
+    .task-item.done {
+      border-left-color: #22C55E;
+      opacity: 0.7;
+    }
+
+    .task-info { flex: 1; }
+    .task-name { font-weight: 700; font-size: 14px; }
+    .task-price { color: #FBBF24; font-size: 12px; margin-top: 2px; }
+
+    .done-label {
+      color: #22C55E;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .wish-item {
+      display: flex;
+      gap: 12px;
+      background: rgba(30, 41, 59, 0.85);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+
+    .wish-img {
+      width: 90px;
+      height: 90px;
+      border-radius: 12px;
+      background: #1E293B;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .wish-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .wish-info { flex: 1; min-width: 0; }
+    .wish-title { font-weight: 800; font-size: 15px; margin-bottom: 4px; }
+    .wish-price { color: #FBBF24; font-size: 13px; margin-bottom: 6px; }
+    .wish-locked { color: #64748B; font-size: 12px; }
+
+    .wish-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: #38BDF8;
+      font-size: 12px;
+      text-decoration: none;
+      margin-top: 4px;
+      padding: 3px 8px;
+      background: rgba(56, 189, 248, 0.12);
+      border-radius: 8px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .wish-link:active { opacity: 0.7; }
+    .wish-actions { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+
+    .bank-input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: #0F172A;
+      color: #E2E8F0;
+      font-size: 18px;
+      text-align: center;
+      font-family: inherit;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .bank-input:focus { outline: none; border-color: #38BDF8; }
+
+    .penalty-item {
+      background: rgba(30, 41, 59, 0.85);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+      border-left: 4px solid #EF4444;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .penalty-name { font-weight: 700; font-size: 14px; }
+    .penalty-reason { font-size: 12px; color: #94A3B8; margin-top: 2px; font-style: italic; }
+    .penalty-date { font-size: 11px; color: #64748B; margin-top: 4px; }
+    .penalty-amount { color: #F87171; font-weight: 800; font-size: 16px; }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      animation: fadeIn 0.2s;
+    }
+
+    .modal {
+      background: #1E293B;
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 400px;
+      width: 100%;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      animation: pop 0.3s;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.85); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .modal h2 { text-align: center; margin-bottom: 16px; color: #38BDF8; }
+
+    .modal input, .modal select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: #0F172A;
+      color: #E2E8F0;
+      font-size: 15px;
+      margin-bottom: 10px;
+      font-family: inherit;
+    }
+
+    .modal input:focus { outline: none; border-color: #38BDF8; }
+
+    .modal label.small {
+      display: block;
+      font-size: 12px;
+      color: #94A3B8;
+      margin-bottom: 4px;
+      margin-top: 4px;
+    }
+
+    .modal-buttons { display: flex; gap: 10px; margin-top: 10px; }
+    .modal-buttons .btn { margin-bottom: 0; }
+
+    .fw-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(15,23,42,0.95) 0%, #000 100%);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      cursor: pointer;
+      overflow: hidden;
+    }
+
+    .fw-overlay h1 {
+      font-size: 36px;
+      color: #FBBF24;
+      margin-bottom: 16px;
+      text-shadow: 0 0 20px rgba(251, 191, 36, 0.6);
+      position: relative;
+      z-index: 2;
+    }
+
+    .fw-overlay .sub { font-size: 18px; color: #fff; position: relative; z-index: 2; }
+    .fw-overlay .big-amount {
+      font-size: 56px;
+      color: #4ADE80;
+      font-weight: 900;
+      margin: 16px 0;
+      text-shadow: 0 0 30px rgba(74, 222, 128, 0.7);
+      position: relative;
+      z-index: 2;
+    }
+
+    .fw-overlay .hint { color: #64748B; font-size: 13px; margin-top: 30px; position: relative; z-index: 2; }
+
+    .firework-particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .firework-rocket {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #FBBF24;
+      box-shadow: 0 0 12px #FBBF24;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .admin-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.85);
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+
+    .admin-row .name { flex: 1; font-size: 13px; font-weight: 600; }
+    .admin-row input {
+      width: 60px;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: #0F172A;
+      color: #E2E8F0;
+      text-align: center;
+      font-family: inherit;
+    }
+
+    .icon-btn {
+      background: rgba(239, 68, 68, 0.2);
+      border: none;
+      color: #F87171;
+      border-radius: 8px;
+      width: 32px;
+      height: 32px;
+      font-size: 16px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .icon-btn.green {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ADE80;
+      width: auto;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .section-title { font-size: 18px; font-weight: 800; margin: 16px 0 10px; color: #38BDF8; }
+    .empty { text-align: center; color: #64748B; padding: 30px 10px; font-size: 14px; }
+
+    .toast {
+      position: fixed;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #22C55E;
+      color: #0F172A;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 700;
+      z-index: 3000;
+      animation: toastIn 0.3s;
+      box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+    }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translate(-50%, 20px); }
+      to   { opacity: 1; transform: translate(-50%, 0); }
+    }
+
+    .admin-wish-card {
+      display: flex;
+      gap: 12px;
+      background: rgba(30, 41, 59, 0.85);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 10px;
+      align-items: flex-start;
+    }
+
+    .admin-wish-img {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      background: #0F172A;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .admin-wish-img img { width: 100%; height: 100%; object-fit: cover; }
+    .admin-wish-body { flex: 1; min-width: 0; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- ВЕСЬ JS КОД ВСТАВЛЕН ПРЯМО СЮДА -->
+  <script>
+// ================== ДАННЫЕ ==================
+const STORAGE_KEY = "wallet_mobile_v1";
+
+function defaultData() {
+  return {
+    admin_password: "1234",
+    child_name: "",
+    money_pending: 0, money_personal: 0, money_bank: 0,
+    current_level: 1, last_seen_level: 1, last_seen_penalty_count: 0, bank_bonus_level: 0, last_approved_amount: 0,
+    today_date: "", today_completed: {}, wishes: [], penalty_history: [],
+    tasks: [
+      { id: 1,  name: "🦷 Почистил зубы (утро)",      price: 1 },
+      { id: 2,  name: "🦷 Почистил зубы (вечер)",     price: 1 },
+      { id: 3,  name: "🛏️ Заправил кровать",          price: 1 },
+      { id: 4,  name: "🚿 Принял душ",                price: 1 },
+      { id: 5,  name: "📚 Сделал уроки",              price: 3 },
+      { id: 6,  name: "📖 Почитал книгу 20 мин",      price: 2 },
+      { id: 7,  name: "✏️ Позанимался письмом",       price: 2 },
+      { id: 8,  name: "🗣️ Выучил English",            price: 2 },
+      { id: 9,  name: "🍽️ Помыл посуду",              price: 2 },
+      { id: 10, name: "🧹 Подмёл/пропылесосил",       price: 2 },
+      { id: 11, name: "🗑️ Вынес мусор",               price: 1 },
+      { id: 12, name: "🧺 Помог со стиркой",          price: 2 },
+      { id: 13, name: "🧸 Убрал игрушки",             price: 1 },
+      { id: 14, name: "😊 Хорошо вёл себя",           price: 1 },
+    ],
+    penalties: [
+      { id: 1, name: "Получил 2", price: 2 },
+      { id: 2, name: "Получил 3", price: 1 },
+      { id: 3, name: "Плохо себя вёл", price: 3 },
+    ],
+    next_task_id: 15, next_penalty_id: 4, next_wish_id: 1,
+  };
+}
+
+let data = loadData();
+let currentUser = null;
+let currentTab = "tasks";
+let adminTab = "approve";
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultData();
+    const d = JSON.parse(raw);
+    const base = defaultData();
+    for (const k in base) if (!(k in d)) d[k] = base[k];
+    return d;
+  } catch (e) { return defaultData(); }
+}
+function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+
+// ================== ЛОГИКА ==================
+function todayISO() { return new Date().toISOString().slice(0, 10); }
+function checkNewDay() {
+  const today = todayISO();
+  if (data.today_date !== today) { data.today_date = today; data.today_completed = {}; saveData(); }
+}
+function updateLevelAndBonus() {
+  const total = data.money_personal + data.money_bank;
+  const newLevel = Math.floor(total / 500) + 1;
+  if (newLevel > data.current_level) data.current_level = newLevel;
+  const bankBonusLevel = Math.floor(data.money_bank / 500);
+  if (bankBonusLevel > (data.bank_bonus_level || 0)) {
+    const diff = bankBonusLevel - (data.bank_bonus_level || 0);
+    const bonus = diff * 50;
+    data.money_bank += bonus;
+    data.bank_bonus_level = bankBonusLevel;
+    showToast(`🏦 Бонус банка: +${bonus} ₽`);
+  }
+  saveData();
+}
+function moneyToNextLevel() {
+  const total = data.money_personal + data.money_bank;
+  const step = 500;
+  const nextThreshold = data.current_level * step;
+  return { left: Math.max(0, nextThreshold - total), total, step };
+}
+function formatDate() {
+  const d = new Date();
+  return d.toLocaleDateString("ru-RU") + " " + d.toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+}
+
+// ================== УТИЛИТЫ UI ==================
+function el(tag, attrs = {}, ...children) {
+  const e = document.createElement(tag);
+  for (const k in attrs) {
+    if (k === "class") e.className = attrs[k];
+    else if (k === "html") e.innerHTML = attrs[k];
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2).toLowerCase(), attrs[k]);
+    else if (k === "style") e.style.cssText = attrs[k];
+    else e.setAttribute(k, attrs[k]);
+  }
+  for (const c of children) {
+    if (c == null) continue;
+    if (typeof c === "string") e.appendChild(document.createTextNode(c));
+    else e.appendChild(c);
+  }
+  return e;
+}
+function showToast(msg, color = "#22C55E") {
+  const t = el("div", { class: "toast" }, msg);
+  t.style.background = color;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+function showModal(title, contentBuilder, buttons = []) {
+  const overlay = el("div", { class: "modal-overlay" });
+  const modal = el("div", { class: "modal" });
+  modal.appendChild(el("h2", {}, title));
+  contentBuilder(modal);
+  const btnRow = el("div", { class: "modal-buttons" });
+  buttons.forEach(b => {
+    btnRow.appendChild(el("button", {
+      class: "btn " + (b.class || "btn-ghost"),
+      onclick: () => { if (b.action) b.action(); if (b.close !== false) overlay.remove(); }
+    }, b.text));
+  });
+  if (buttons.length) modal.appendChild(btnRow);
+  overlay.appendChild(modal);
+  overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+  return overlay;
+}
+
+// ================== САЛЮТ ==================
+const CONFETTI_COLORS = ["#F87171", "#FBBF24", "#4ADE80", "#38BDF8", "#E879F9", "#FB923C", "#FFFFFF", "#F472B6"];
+function launchFirework(overlay) {
+  const w = overlay.clientWidth;
+  const h = overlay.clientHeight;
+  const cx = w / 2 + (Math.random() - 0.5) * w * 0.3;
+  const cy = h * 0.35 + (Math.random() - 0.5) * h * 0.15;
+  const count = 50;
+  const baseColor = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+  const useMultiColor = Math.random() > 0.5;
+
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count + Math.random() * 0.2;
+    const speed = 60 + Math.random() * 180;
+    const size = 4 + Math.random() * 5;
+    const color = useMultiColor ? CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)] : baseColor;
+    const p = el("div", { class: "firework-particle" });
+    p.style.left = cx + "px"; p.style.top = cy + "px";
+    p.style.width = size + "px"; p.style.height = size + "px";
+    p.style.background = color; p.style.color = color;
+    overlay.appendChild(p);
+
+    const vx = Math.cos(angle) * speed;
+    const vy = Math.sin(angle) * speed;
+    const life = 1200 + Math.random() * 800;
+    const start = performance.now();
+
+    function step(now) {
+      const t = (now - start) / 1000;
+      const progress = (now - start) / life;
+      if (progress >= 1 || !p.parentNode) { p.remove(); return; }
+      const x = cx + vx * t;
+      const y = cy + vy * t + 0.5 * 300 * t * t;
+      p.style.left = x + "px"; p.style.top = y + "px";
+      p.style.opacity = String(1 - progress);
+      p.style.transform = `scale(${1 - progress * 0.5})`;
+      requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  const rocket = el("div", { class: "firework-rocket" });
+  const startX = cx + (Math.random() - 0.5) * 60;
+  rocket.style.left = startX + "px";
+  rocket.style.top = h + "px";
+  overlay.appendChild(rocket);
+  let rocketT = 0;
+  function rocketStep() {
+    rocketT += 0.03;
+    if (rocketT >= 1 || !rocket.parentNode) { rocket.remove(); return; }
+    const y = h - (h - cy) * rocketT;
+    const x = startX + (cx - startX) * rocketT;
+    rocket.style.left = x + "px"; rocket.style.top = y + "px";
+    requestAnimationFrame(rocketStep);
+  }
+  requestAnimationFrame(rocketStep);
+}
+
+function showCelebration(title, subtitle, amount, onDone) {
+  const overlay = el("div", { class: "fw-overlay" });
+  overlay.appendChild(el("h1", {}, title));
+  overlay.appendChild(el("div", { class: "sub" }, subtitle));
+  if (amount != null) overlay.appendChild(el("div", { class: "big-amount" }, `+${amount} ₽`));
+  overlay.appendChild(el("div", { class: "hint" }, "(нажми, чтобы продолжить)"));
+  let bursts = 0;
+  const interval = setInterval(() => {
+    if (!overlay.parentNode) { clearInterval(interval); return; }
+    launchFirework(overlay);
+    bursts++;
+    if (bursts >= 8) clearInterval(interval);
+  }, 450);
+  overlay.addEventListener("click", () => { clearInterval(interval); overlay.remove(); if (onDone) onDone(); });
+  document.body.appendChild(overlay);
+  setTimeout(() => { if (overlay.parentNode) { clearInterval(interval); overlay.remove(); if (onDone) onDone(); } }, 6500);
+}
+
+// ================== ЭКРАН ВХОДА ==================
+function renderLogin() {
+  currentUser = null;
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+  const screen = el("div", { class: "login-screen" });
+  screen.appendChild(el("div", { class: "login-emoji" }, "💰"));
+  screen.appendChild(el("div", { class: "title" }, "Мой Кошелек"));
+  screen.appendChild(el("div", { class: "subtitle" }, "Копи, выполняй задания, исполняй мечты!"));
+  const buttons = el("div", { class: "login-buttons" });
+  buttons.appendChild(el("button", { class: "btn btn-success", onclick: loginChild }, "👦 Я Ребёнок"));
+  buttons.appendChild(el("button", { class: "btn btn-warn", onclick: loginAdmin }, "👩 Я Мама (Админ)"));
+  screen.appendChild(buttons);
+  app.appendChild(screen);
+}
+
+function loginChild() {
+  checkNewDay();
+  const proceed = () => {
+    if (data.last_approved_amount > 0) {
+      const amount = data.last_approved_amount;
+      data.last_approved_amount = 0; saveData();
+      showCelebration("🎉 Ура!", `${data.child_name}, тебе зачислено:`, amount, afterApproved);
+    } else afterApproved();
+  };
+  const afterApproved = () => {
+    if (data.current_level > (data.last_seen_level || 1)) {
+      const lvl = data.current_level; data.last_seen_level = lvl; saveData();
+      showCelebration(`⭐ Уровень ${lvl}!`, `${data.child_name}, ты большой молодец!`, null, afterLevel);
+    } else afterLevel();
+  };
+  const afterLevel = () => {
+    const seen = data.last_seen_penalty_count || 0;
+    const history = data.penalty_history || [];
+    const newPens = history.slice(seen);
+    if (newPens.length) {
+      data.last_seen_penalty_count = history.length; saveData();
+      const total = newPens.reduce((s, p) => s + p.price, 0);
+      let msg = newPens.map(p => `⚠️ ${p.name} (−${p.price} ₽)`).join("\n");
+      showModal("⚠️ У тебя штрафы", (m) => {
+          m.appendChild(el("div", { style: "white-space:pre-line;text-align:center;margin-bottom:10px;" }, msg));
+          m.appendChild(el("div", { style: "text-align:center;color:#F87171;font-weight:800;font-size:18px;" }, `Всего: −${total} ₽`));
+          m.appendChild(el("div", { style: "text-align:center;color:#94A3B8;font-size:13px;margin-top:10px;" }, "Постарайся больше так не делать 💪"));
+      }, [{ text: "Понятно", class: "btn-danger" }]);
+      setTimeout(() => { currentUser = "child"; currentTab = "tasks"; renderApp(); }, 100);
+    } else { currentUser = "child"; currentTab = "tasks"; renderApp(); }
+  };
+
+  if (!data.child_name) {
+    showModal("Знакомство", (m) => {
+        const inp = el("input", { placeholder: "Как тебя зовут?", maxlength: "30" });
+        m.appendChild(inp); setTimeout(() => inp.focus(), 100);
+    }, [
+        { text: "Отмена", class: "btn-ghost" },
+        { text: "Поехали!", class: "btn-success", action: () => {
+            const name = document.querySelector(".modal input").value.trim();
+            if (!name) { showToast("Введи имя!", "#F87171"); return; }
+            data.child_name = name;
+            data.last_seen_level = data.current_level;
+            data.last_seen_penalty_count = (data.penalty_history || []).length;
+            saveData(); proceed();
+        }}
+    ]);
+  } else proceed();
+}
+
+function loginAdmin() {
+  showModal("Вход для Мамы", (m) => {
+      const inp = el("input", { type: "password", placeholder: "Пароль" });
+      m.appendChild(inp); setTimeout(() => inp.focus(), 100);
+  }, [
+      { text: "Отмена", class: "btn-ghost" },
+      { text: "Войти", class: "btn-warn", action: () => {
+          const pwd = document.querySelector(".modal input").value;
+          if (pwd === data.admin_password) { currentUser = "admin"; adminTab = "approve"; renderApp(); }
+          else showToast("Неверный пароль!", "#F87171");
+      }}
+  ]);
+}
+
+// ================== ГЛАВНЫЙ РЕНДЕР ==================
+function renderApp() {
+  checkNewDay();
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+  if (currentUser === "child") { renderChildHeader(app); renderChildContent(app); renderChildTabs(app); }
+  else { renderAdminHeader(app); renderAdminContent(app); renderAdminTabs(app); }
+}
+
+// ================== РЕБЁНОК ==================
+function renderChildHeader(app) {
+  const header = el("div", { class: "header" });
+  const top = el("div", { class: "header-top" });
+  top.appendChild(el("div", { class: "hello" }, `👋 Привет, ${data.child_name}!`));
+  top.appendChild(el("button", { class: "btn btn-sm btn-ghost", style: "color:#fff;border-color:rgba(255,255,255,0.3);", onclick: renderLogin }, "🚪 Меню"));
+  header.appendChild(top);
+
+  const coins = el("div", { class: "coins-row" });
+  coins.appendChild(coinPlate("⏳", "Ожидает", `${data.money_pending} ₽`, "pending"));
+  coins.appendChild(coinPlate("💰", "Мои", `${data.money_personal} ₽`, "personal"));
+  coins.appendChild(coinPlate("🏦", "Банк", `${data.money_bank} ₽`, "bank"));
+  header.appendChild(coins);
+
+  const { left, total, step } = moneyToNextLevel();
+  const curProgress = total % step;
+  let ratio = curProgress / step;
+  if (total > 0 && curProgress === 0) ratio = 1;
+  const levelRow = el("div", { class: "level-row" });
+  levelRow.appendChild(el("span", {}, `⭐ Уровень ${data.current_level}`));
+  levelRow.appendChild(el("span", {}, `Всего: ${total} ₽`));
+  header.appendChild(levelRow);
+  const progBg = el("div", { class: "progress-bg" });
+  progBg.appendChild(el("div", { class: "progress-fill", style: `width:${ratio * 100}%` }));
+  header.appendChild(progBg);
+  header.appendChild(el("div", { class: "progress-text" }, `До уровня ${data.current_level + 1}: ${left} ₽ (${curProgress}/${step})`));
+  app.appendChild(header);
+}
+function coinPlate(icon, label, value, type) {
+  const p = el("div", { class: "coin-plate " + type });
+  p.appendChild(el("div", { class: "icon" }, icon));
+  p.appendChild(el("div", { class: "label" }, label));
+  p.appendChild(el("div", { class: "value" }, value));
+  return p;
+}
+function renderChildContent(app) {
+  const content = el("div", { class: "screen" });
+  if (currentTab === "tasks") renderTasksTab(content);
+  else if (currentTab === "wishes") renderWishesTab(content);
+  else if (currentTab === "bank") renderBankTab(content);
+  else if (currentTab === "penalties") renderPenaltiesTab(content);
+  app.appendChild(content);
+}
+function renderChildTabs(app) {
+  const tabs = el("div", { class: "tabs" });
+  const items = [
+    { key: "tasks", icon: "✅", label: "Задания" },
+    { key: "wishes", icon: "🎁", label: "Желания" },
+    { key: "bank", icon: "🏦", label: "Банк" },
+    { key: "penalties", icon: "⚠️", label: "Штрафы" },
+  ];
+  items.forEach(it => {
+    tabs.appendChild(el("button", { class: "tab-btn " + (currentTab === it.key ? "active" : ""), onclick: () => { currentTab = it.key; renderApp(); } },
+      el("span", { class: "tab-icon" }, it.icon), el("span", {}, it.label)
+    ));
+  });
+  app.appendChild(tabs);
+}
+
+function renderTasksTab(container) {
+  container.appendChild(el("h2", { class: "section-title" }, "✅ Выполни задание — получи монетки!"));
+  if (!data.tasks.length) { container.appendChild(el("div", { class: "empty" }, "Заданий пока нет.")); return; }
+  data.tasks.forEach(task => {
+    const isDone = !!data.today_completed[String(task.id)];
+    const row = el("div", { class: "task-item" + (isDone ? " done" : "") });
+    const info = el("div", { class: "task-info" });
+    info.appendChild(el("div", { class: "task-name" }, task.name));
+    info.appendChild(el("div", { class: "task-price" }, `💰 ${task.price} ₽`));
+    row.appendChild(info);
+    if (isDone) row.appendChild(el("div", { class: "done-label" }, "✅ Выполнено"));
+    else row.appendChild(el("button", { class: "btn btn-sm btn-success", onclick: () => doTask(task) }, "Выполнить"));
+    container.appendChild(row);
+  });
+}
+function doTask(task) {
+  data.today_completed[String(task.id)] = true;
+  data.money_pending += task.price; saveData();
+  showToast(`+${task.price} ₽ в копилочку!`); renderApp();
+}
+
+function renderWishesTab(container) {
+  const top = el("div", { style: "display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;" });
+  top.appendChild(el("h2", { class: "section-title", style: "margin:0;" }, "🎁 Мои желания"));
+  top.appendChild(el("button", { class: "btn btn-sm btn-warn", onclick: openAddWishModal }, "➕ Добавить"));
+  container.appendChild(top);
+  if (!data.wishes.length) { container.appendChild(el("div", { class: "empty" }, "Список пуст. Добавь своё первое желание! 🌟")); return; }
+  data.wishes.forEach(w => {
+    const row = el("div", { class: "wish-item" });
+    const imgBox = el("div", { class: "wish-img" });
+    if (w.image) imgBox.appendChild(el("img", { src: w.image, alt: "" }));
+    else imgBox.textContent = "🎁";
+    row.appendChild(imgBox);
+    const info = el("div", { class: "wish-info" });
+    info.appendChild(el("div", { class: "wish-title" }, w.title || "Желание"));
+    info.appendChild(el("div", { class: "wish-price" }, `💰 ${w.price} ₽`));
+    if (w.link) {
+      const link = el("a", { class: "wish-link", href: w.link, target: "_blank", rel: "noopener noreferrer" }, "🔗 Посмотреть в магазине");
+      info.appendChild(link);
+    }
+    const actions = el("div", { class: "wish-actions" });
+    if (data.money_personal >= w.price) actions.appendChild(el("button", { class: "btn btn-sm btn-success", onclick: () => buyWish(w) }, `🛒 Купить за ${w.price} ₽`));
+    else actions.appendChild(el("div", { class: "wish-locked" }, `🔒 Не хватает ${w.price - data.money_personal} ₽`));
+    info.appendChild(actions);
+    row.appendChild(info);
+    container.appendChild(row);
+  });
+}
+
+function openAddWishModal() {
+  showModal("Новое желание", (m) => {
+    m.appendChild(el("input", { placeholder: "Что ты хочешь?", maxlength: "60", id: "wishTitle" }));
+    m.appendChild(el("input", { placeholder: "Цена (₽)", type: "number", id: "wishPrice", min: "1" }));
+    const preview = el("div", { id: "wishPreview", style: "width:100%;height:120px;border-radius:12px;background:#0F172A;display:flex;align-items:center;justify-content:center;font-size:40px;color:#475569;margin-bottom:10px;overflow:hidden;" }, "🎁");
+    m.appendChild(preview);
+    const labelImg = el("label", { class: "small" }, "📷 Картинка (необязательно):"); m.appendChild(labelImg);
+    const fileInput = el("input", { type: "file", accept: "image/*", id: "wishImg", style: "padding:8px;" }); m.appendChild(fileInput);
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => { preview.innerHTML = ""; preview.appendChild(el("img", { src: e.target.result, style: "width:100%;height:100%;object-fit:cover;" })); };
+      reader.readAsDataURL(file);
+    });
+    const labelLink = el("label", { class: "small" }, "🔗 Ссылка на магазин (необязательно):"); m.appendChild(labelLink);
+    m.appendChild(el("input", { type: "url", placeholder: "https://www.ozon.ru/...", id: "wishLink" }));
+  }, [
+    { text: "Отмена", class: "btn-ghost" },
+    { text: "Сохранить", class: "btn-success", action: () => {
+        const title = document.getElementById("wishTitle").value.trim();
+        const price = parseInt(document.getElementById("wishPrice").value);
+        const link = document.getElementById("wishLink").value.trim();
+        const file = document.getElementById("wishImg").files[0];
+        if (!title) { showToast("Введи название!", "#F87171"); return; }
+        if (!price || price <= 0) { showToast("Введи цену!", "#F87171"); return; }
+        const finish = (imageData) => {
+          const wid = data.next_wish_id; data.next_wish_id += 1;
+          data.wishes.push({ id: wid, title, price, image: imageData || "", link: link || "" });
+          saveData(); showToast("Желание добавлено!"); renderApp();
+        };
+        if (file) { const reader = new FileReader(); reader.onload = e => finish(e.target.result); reader.readAsDataURL(file); }
+        else finish("");
+    }}
+  ]);
+}
+
+function buyWish(wish) {
+  if (data.money_personal < wish.price) return;
+  showModal("Купить?", (m) => { m.appendChild(el("div", { style: "text-align:center;margin-bottom:10px;" }, `«${wish.title}» за ${wish.price} ₽?`)); }, [
+    { text: "Отмена", class: "btn-ghost" },
+    { text: "Купить", class: "btn-success", action: () => { data.money_personal -= wish.price; saveData(); showToast("Покупка совершена! 🎉"); renderApp(); } }
+  ]);
+}
+
+function renderBankTab(container) {
+  container.appendChild(el("h2", { class: "section-title" }, "🏦 Банк"));
+  container.appendChild(el("div", { style: "text-align:center;color:#38BDF8;font-size:13px;margin-bottom:16px;" }, "✨ Каждые 500 ₽ в банке = бонус +50 ₽! ✨"));
+  const c1 = el("div", { class: "card" });
+  c1.appendChild(el("h3", { style: "color:#38BDF8;margin-bottom:10px;" }, "⬇️ Положить в банк"));
+  c1.appendChild(el("input", { class: "bank-input", type: "number", id: "depositInput", placeholder: "Сумма" }));
+  c1.appendChild(el("button", { class: "btn btn-primary", onclick: () => transferToBank() }, "В банк"));
+  container.appendChild(c1);
+  const c2 = el("div", { class: "card" });
+  c2.appendChild(el("h3", { style: "color:#FBBF24;margin-bottom:10px;" }, "⬆️ Снять из банка"));
+  c2.appendChild(el("input", { class: "bank-input", type: "number", id: "withdrawInput", placeholder: "Сумма" }));
+  c2.appendChild(el("button", { class: "btn btn-warn", onclick: () => withdrawFromBank() }, "Из банка"));
+  container.appendChild(c2);
+}
+function transferToBank() {
+  const amount = parseInt(document.getElementById("depositInput").value);
+  if (!amount || amount <= 0) { showToast("Введи сумму!", "#F87171"); return; }
+  if (amount > data.money_personal) { showToast("Недостаточно денег!", "#F87171"); return; }
+  data.money_personal -= amount; data.money_bank += amount; saveData(); updateLevelAndBonus();
+  showToast(`+${amount} ₽ в банк!`); renderApp();
+}
+function withdrawFromBank() {
+  const amount = parseInt(document.getElementById("withdrawInput").value);
+  if (!amount || amount <= 0) { showToast("Введи сумму!", "#F87171"); return; }
+  if (amount > data.money_bank) { showToast("В банке нет столько!", "#F87171"); return; }
+  data.money_bank -= amount; data.money_personal += amount; saveData();
+  showToast(`−${amount} ₽ из банка`); renderApp();
+}
+
+function renderPenaltiesTab(container) {
+  container.appendChild(el("h2", { class: "section-title", style: "color:#F87171;" }, "⚠️ Мои штрафы"));
+  const history = data.penalty_history || [];
+  const total = history.reduce((s, p) => s + p.price, 0);
+  container.appendChild(el("div", { style: "text-align:center;color:#F87171;font-weight:800;margin-bottom:16px;" }, `Всего списано: −${total} ₽`));
+  if (!history.length) { container.appendChild(el("div", { class: "empty" }, "У тебя пока нет штрафов. Молодец! 👍🌟")); return; }
+  history.slice().reverse().forEach(p => {
+    const row = el("div", { class: "penalty-item" });
+    const left = el("div", {});
+    left.appendChild(el("div", { class: "penalty-name" }, `⚠️ ${p.name}`));
+    if (p.reason) left.appendChild(el("div", { class: "penalty-reason" }, `Причина: ${p.reason}`));
+    left.appendChild(el("div", { class: "penalty-date" }, `📅 ${p.date || ""}`));
+    row.appendChild(left); row.appendChild(el("div", { class: "penalty-amount" }, `−${p.price} ₽`));
+    container.appendChild(row);
+  });
+}
+
+// ================== АДМИН (МАМА) ==================
+function renderAdminHeader(app) {
+  const header = el("div", { class: "header", style: "background:linear-gradient(135deg,#92400E,#B45309);" });
+  const top = el("div", { class: "header-top" });
+  top.appendChild(el("div", { class: "hello" }, "👩 Кабинет Мамы"));
+  top.appendChild(el("button", { class: "btn btn-sm btn-ghost", style: "color:#fff;border-color:rgba(255,255,255,0.3);", onclick: renderLogin }, "🚪 Меню"));
+  header.appendChild(top); app.appendChild(header);
+}
+function renderAdminContent(app) {
+  const content = el("div", { class: "screen" });
+  if (adminTab === "approve") renderApproveTab(content);
+  else if (adminTab === "tasks") renderAdminTasks(content);
+  else if (adminTab === "penalties") renderAdminPenalties(content);
+  else if (adminTab === "history") renderAdminHistory(content);
+  else if (adminTab === "wishes") renderAdminWishes(content);
+  else if (adminTab === "settings") renderAdminSettings(content);
+  app.appendChild(content);
+}
+function renderAdminTabs(app) {
+  const tabs = el("div", { class: "tabs", style: "overflow-x:auto;" });
+  const items = [
+    { key: "approve", icon: "👍", label: "Одобрение" },
+    { key: "tasks", icon: "✅", label: "Задания" },
+    { key: "penalties", icon: "⚠️", label: "Штрафы" },
+    { key: "history", icon: "📜", label: "История" },
+    { key: "wishes", icon: "🎁", label: "Желания" },
+    { key: "settings", icon: "⚙️", label: "Настройки" },
+  ];
+  items.forEach(it => {
+    tabs.appendChild(el("button", { class: "tab-btn " + (adminTab === it.key ? "active" : ""), style: "min-width:70px;", onclick: () => { adminTab = it.key; renderApp(); } },
+      el("span", { class: "tab-icon" }, it.icon), el("span", {}, it.label)
+    ));
+  });
+  app.appendChild(tabs);
+}
+
+function renderApproveTab(container) {
+  container.appendChild(el("h2", { class: "section-title" }, "👍 Ожидают подтверждения"));
+  container.appendChild(el("div", { style: "text-align:center;font-size:24px;font-weight:900;color:#FBBF24;margin-bottom:16px;" }, `${data.money_pending} ₽`));
+  const doneTasks = data.tasks.filter(t => data.today_completed[String(t.id)]);
+  if (!doneTasks.length) container.appendChild(el("div", { class: "empty" }, "Пока ничего не выполнено."));
+  else doneTasks.forEach(t => {
+    const row = el("div", { class: "task-item done" });
+    row.appendChild(el("div", { class: "task-info" }, el("div", { class: "task-name" }, t.name), el("div", { class: "task-price" }, `+${t.price} ₽`)));
+    container.appendChild(row);
+  });
+  if (data.money_pending > 0) {
+    container.appendChild(el("button", { class: "btn btn-success", style: "margin-top:16px;", onclick: approveMoney }, "✅ Одобрить"));
+    container.appendChild(el("button", { class: "btn btn-danger", onclick: rejectMoney }, "❌ Отклонить"));
+  }
+}
+function approveMoney() {
+  if (data.money_pending <= 0) return;
+  const amount = data.money_pending;
+  data.money_personal += amount; data.money_pending = 0; data.today_completed = {}; data.last_approved_amount = amount;
+  saveData(); updateLevelAndBonus();
+  showCelebration("✅ Деньги начислены!", `${data.child_name}, тебе зачислено:`, amount, null);
+  renderApp();
+}
+function rejectMoney() {
+  if (data.money_pending <= 0) return;
+  showModal("Точно?", (m) => m.appendChild(el("div", { style: "text-align:center;" }, "Обнулить предварительную сумму и снять галочки?")), [
+    { text: "Отмена", class: "btn-ghost" },
+    { text: "Обнулить", class: "btn-danger", action: () => { data.money_pending = 0; data.today_completed = {}; saveData(); renderApp(); } }
+  ]);
+}
+
+function renderAdminTasks(container) {
+  container.appendChild(el("h2", { class: "section-title" }, "✅ Задания"));
+  renderManageList(container, "tasks", "next_task_id");
+}
+function renderAdminPenalties(container) {
+  container.appendChild(el("h2", { class: "section-title", style: "color:#F87171;" }, "⚠️ Штрафы"));
+  renderManageList(container, "penalties", "next_penalty_id", true);
+}
+function renderManageList(container, listKey, nextIdKey, isPenalty = false) {
+  const addBox = el("div", { class: "card" });
+  addBox.appendChild(el("input", { placeholder: "Название", id: "addName", style: "margin-bottom:8px;" }));
+  addBox.appendChild(el("input", { type: "number", placeholder: "Цена (₽)", id: "addPrice", style: "margin-bottom:8px;" }));
+  addBox.appendChild(el("button", { class: "btn btn-primary", onclick: () => {
+      const name = document.getElementById("addName").value.trim();
+      const price = parseInt(document.getElementById("addPrice").value);
+      if (!name) { showToast("Введи название!", "#F87171"); return; }
+      data[listKey].push({ id: data[nextIdKey], name, price: price || 1 });
+      data[nextIdKey] += 1; saveData(); showToast("Добавлено!"); renderApp();
+  } }, "➕ Добавить"));
+  container.appendChild(addBox);
+  if (!data[listKey].length) { container.appendChild(el("div", { class: "empty" }, "Пока пусто.")); return; }
+  data[listKey].forEach((item, idx) => {
+    const row = el("div", { class: "admin-row" });
+    row.appendChild(el("div", { class: "name" }, item.name));
+    const priceInp = el("input", { type: "number", value: item.price });
+    priceInp.addEventListener("change", () => { item.price = parseInt(priceInp.value) || 0; saveData(); });
+    row.appendChild(priceInp);
+    if (isPenalty) row.appendChild(el("button", { class: "icon-btn green", onclick: () => applyPenalty(item) }, "🚫"));
+    row.appendChild(el("button", { class: "icon-btn", onclick: () => { data[listKey].splice(idx, 1); saveData(); renderApp(); } }, "✖"));
+    container.appendChild(row);
+  });
+}
+function applyPenalty(pen) {
+  showModal("Применить штраф?", (m) => {
+    m.appendChild(el("div", { style: "text-align:center;margin-bottom:10px;" }, `«${pen.name}» — ${pen.price} ₽`));
+    m.appendChild(el("input", { placeholder: "Причина (необязательно)", id: "penReason" }));
+  }, [
+    { text: "Отмена", class: "btn-ghost" },
+    { text: "Списать", class: "btn-danger", action: () => {
+        const reason = document.getElementById("penReason").value.trim();
+        const amount = pen.price;
+        if (data.money_personal >= amount) data.money_personal -= amount;
+        else { const remainder = amount - data.money_personal; data.money_personal = 0; if (data.money_bank >= remainder) data.money_bank -= remainder; else data.money_bank = 0; }
+        data.penalty_history.push({ name: pen.name, price: amount, reason, date: formatDate() });
+        saveData(); showToast(`Списано ${amount} ₽`, "#F87171"); renderApp();
+    }}
+  ]);
+}
+
+function renderAdminHistory(container) {
+  container.appendChild(el("h2", { class: "section-title", style: "color:#F87171;" }, "📜 История штрафов"));
+  const history = data.penalty_history || [];
+  const total = history.reduce((s, p) => s + p.price, 0);
+  container.appendChild(el("div", { style: "text-align:center;color:#94A3B8;margin-bottom:12px;" }, `Всего: ${history.length} | Сумма: −${total} ₽`));
+  if (history.length) {
+    container.appendChild(el("button", { class: "btn btn-danger", onclick: () => {
+        showModal("Очистить историю?", (m) => m.appendChild(el("div", { style: "text-align:center;" }, "Деньги не вернутся!")), [
+          { text: "Отмена", class: "btn-ghost" },
+          { text: "Очистить", class: "btn-danger", action: () => { data.penalty_history = []; data.last_seen_penalty_count = 0; saveData(); renderApp(); } }
+        ]);
+    } }, "🗑️ Очистить историю"));
+  }
+  if (!history.length) { container.appendChild(el("div", { class: "empty" }, "История пуста.")); return; }
+  history.slice().reverse().forEach(p => {
+    const row = el("div", { class: "penalty-item" });
+    const left = el("div", {});
+    left.appendChild(el("div", { class: "penalty-name" }, `⚠️ ${p.name}`));
+    if (p.reason) left.appendChild(el("div", { class: "penalty-reason" }, `Причина: ${p.reason}`));
+    left.appendChild(el("div", { class: "penalty-date" }, `📅 ${p.date || ""}`));
+    row.appendChild(left); row.appendChild(el("div", { class: "penalty-amount" }, `−${p.price} ₽`));
+    container.appendChild(row);
+  });
+}
+
+function renderAdminWishes(container) {
+  container.appendChild(el("h2", { class: "section-title" }, "🎁 Желания ребёнка"));
+  if (!data.wishes.length) { container.appendChild(el("div", { class: "empty" }, "Ребёнок пока не добавил желаний.")); return; }
+  data.wishes.forEach(w => {
+    const card = el("div", { class: "admin-wish-card" });
+    const imgBox = el("div", { class: "admin-wish-img" });
+    if (w.image) imgBox.appendChild(el("img", { src: w.image, alt: "" }));
+    else imgBox.textContent = "🎁";
+    card.appendChild(imgBox);
+
+    const body = el("div", { class: "admin-wish-body" });
+    const titleRow = el("div", { style: "display:flex;gap:6px;margin-bottom:6px;" });
+    const titleInp = el("input", { value: w.title || "", style: "flex:1;padding:8px;border-radius:8px;border:1px solid rgba(56,189,248,0.3);background:#0F172A;color:#E2E8F0;font-family:inherit;" });
+    titleInp.addEventListener("change", () => { w.title = titleInp.value; saveData(); });
+    titleRow.appendChild(titleInp);
+    titleRow.appendChild(el("button", { class: "icon-btn", onclick: () => { data.wishes = data.wishes.filter(x => x !== w); saveData(); renderApp(); } }, "✖"));
+    body.appendChild(titleRow);
+
+    const priceRow = el("div", { style: "display:flex;gap:6px;align-items:center;margin-bottom:6px;" });
+    priceRow.appendChild(el("span", { style: "font-size:12px;color:#94A3B8;" }, "Цена:"));
+    const priceInp = el("input", { type: "number", value: w.price, style: "flex:1;padding:8px;border-radius:8px;border:1px solid rgba(56,189,248,0.3);background:#0F172A;color:#E2E8F0;font-family:inherit;" });
+    priceInp.addEventListener("change", () => { w.price = parseInt(priceInp.value) || 0; saveData(); });
+    priceRow.appendChild(priceInp);
+    body.appendChild(priceRow);
+
+    if (w.link) body.appendChild(el("a", { class: "wish-link", href: w.link, target: "_blank", rel: "noopener noreferrer", style: "display:inline-flex;margin-top:4px;" }, "🔗 Открыть в магазине"));
+    card.appendChild(body); container.appendChild(card);
+  });
+}
+
+function renderAdminSettings(container) {
+  container.appendChild(el("h2", { class: "section-title" }, "⚙️ Настройки"));
+  const c1 = el("div", { class: "card" });
+  c1.appendChild(el("h3", { style: "margin-bottom:10px;color:#38BDF8;" }, "Новый пароль"));
+  c1.appendChild(el("input", { type: "password", id: "newPwd", placeholder: "Новый пароль", style: "margin-bottom:10px;" }));
+  c1.appendChild(el("button", { class: "btn btn-success", onclick: () => {
+      const pwd = document.getElementById("newPwd").value.trim();
+      if (!pwd) { showToast("Введи пароль!", "#F87171"); return; }
+      data.admin_password = pwd; saveData(); showToast("Пароль изменён!");
+  } }, "Сохранить"));
+  container.appendChild(c1);
+
+  const c2 = el("div", { class: "card" });
+  c2.appendChild(el("h3", { style: "margin-bottom:10px;color:#F87171;" }, "Сброс данных"));
+  c2.appendChild(el("button", { class: "btn btn-danger", onclick: () => {
+      showModal("Сбросить ВСЁ?", (m) => m.appendChild(el("div", { style: "text-align:center;" }, "Удалить имя, деньги, задания, желания, историю. Продолжить?")), [
+        { text: "Отмена", class: "btn-ghost" },
+        { text: "Сбросить", class: "btn-danger", action: () => { data = defaultData(); saveData(); showToast("Данные сброшены", "#F87171"); renderLogin(); } }
+      ]);
+  } }, "🔥 СБРОСИТЬ ВСЁ"));
+  container.appendChild(c2);
+}
+
+document.addEventListener("DOMContentLoaded", () => { checkNewDay(); renderLogin(); });
+  </script>
+</body>
+</html>
+  <div id="app"></div>
+  <script src="app.js"></script>
+</body>
+</html>

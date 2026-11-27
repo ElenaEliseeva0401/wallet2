@@ -1,0 +1,9 @@
+{
+  "name": "Мой Кошелек",
+  "short_name": "Кошелек",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#42A5F5",
+  "icons": []
+}
